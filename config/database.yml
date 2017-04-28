@@ -1,0 +1,23 @@
+default: &default
+  adapter: postgresql
+  encoding: utf8
+  host: localhost
+  port: 5432
+  pool: <%= ENV['DB_POOL'] || ENV['MAX_THREADS'] || 5 %>
+  url: <%= ENV['DATABASE_URL'] %>
+  # username: <%= ENV['DB_USERNAME'] %>
+  # password: <%= ENV['DB_PASSWORD'] %>
+  timeout: 5000
+
+development:
+  <<: *default
+  database: addressbook_development
+
+test:
+  <<: *default
+  database: addressbook_test
+
+production:
+  pool: <%= ENV['DB_POOL'] || ENV['MAX_THREADS'] || 5 %>
+  url: <%= ENV['DB_URL'] %>
+
