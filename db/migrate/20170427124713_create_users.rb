@@ -5,12 +5,11 @@ class CreateUsers < ActiveRecord::Migration[5.0]
 
       t.timestamps
     end
-    
+
     create_table :users do |t|
       t.string :email
-      t.string :password
+      t.string :password_digest
       t.belongs_to :user_type, index: true
-
 
       t.timestamps
     end
