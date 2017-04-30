@@ -10,7 +10,9 @@ describe User, type: :model do
   end
 
   before do 
-    @user = User.new(email: valid_email, type: valid_user_type)
+    @user = User.new(email:    valid_email, 
+                     type:     valid_user_type,
+                     password: 'some.password')
   end
 
   it 'should have one user type association' do 
