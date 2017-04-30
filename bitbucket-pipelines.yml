@@ -3,11 +3,30 @@
 # Only use spaces to indent your .yml configuration.
 # -----
 # You can specify a custom docker image from Docker Hub as your build environment.
-image: ruby:2.4.0
+image: ruby:2.2.3
 
 pipelines:
   default:
     - step:
         script: # Modify the commands below to build your repository.
+          # - postgresql start
+          # - sudo -u postgres sh -c 'createuser --superuser root &amp; createdb ruby'
+          # - sudo -u postgres psql -c "ALTER USER root PASSWORD 'postgres';"
+          - gem install 'pg'
+          - apt-get update
+          - apt-get --assume-yes install nodejs
           - bundle install
+          - rake db:create db:migrate db:schema:load --trace RAILS_ENV=test
           - rspec
+
+        services:
+          - postgres
+
+definitions: 
+  services: 
+    postgres: 
+      image: postgres 
+      environment: 
+        POSTGRES_DB: 'addressbook_test' 
+        POSTGRES_USER: 'root'
+        POSTGRES_PASSWORD: 'postgres'
