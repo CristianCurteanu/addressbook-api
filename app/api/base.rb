@@ -1,6 +1,7 @@
 module Base
   class API < Grape::API
     format :json
+
     rescue_from :all do |e|
       if Rails.env.development? || Rails.env.test?
         error!(e, 500)
@@ -15,6 +16,14 @@ module Base
 
     rescue_from ActiveRecord::RecordNotFound do |e|
       error_response(message: e.message, status: 404)
+    end
+
+    rescue_from :all do |e|
+      if Rails.env.development? || Rails.env.test?
+        error!(e, 500)
+      else
+        error!('Internal server error', 500)
+      end
     end
 
     content_type :json, 'application/json; charset=UTF-8'
