@@ -18,7 +18,6 @@ Bundler.require(*Rails.groups)
 
 module AddressbookApp
   class Application < Rails::Application
-
     config.generators do |generate|
       generate.test_framework :rspec
     end

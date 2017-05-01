@@ -20,4 +20,10 @@
 # available at http://guides.rubyonrails.org/i18n.html.
 
 en:
-  hello: "Hello world"
+  grape:
+    errors:
+      format: ! '%{attributes} %{message}'
+      messages:
+        value_required: 'parameter empty'
+      attributes:
+        value: 'Value'
