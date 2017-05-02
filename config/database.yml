@@ -15,8 +15,6 @@ development:
 
 test:
   <<: *default
-  username: root
-  password: postgres
   database: addressbook_test
 
 production:
