@@ -8,6 +8,11 @@ require 'rspec/rails'
 require 'airborne'
 require 'database_cleaner'
 require 'faker'
+<<<<<<< 8a96fe71943cb6ee8c6f3101cf265e6651efe47c
+=======
+require 'webmock/rspec'
+
+>>>>>>> Added additional User resources
 # Add additional requires below this line. Rails is not loaded until this point!
 
 # Requires supporting ruby files with custom matchers and macros, etc, in

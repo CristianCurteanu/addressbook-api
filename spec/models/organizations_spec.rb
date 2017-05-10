@@ -15,4 +15,8 @@ describe Organization, type: :model do
     organization.users << User.new(email: 'some.email@gmail.com')
     expect(organization.users).to be_present
   end
+
+  # TODO
+  it 'should serialize with contacts' do 
+  end
 end

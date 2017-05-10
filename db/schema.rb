@@ -10,15 +10,34 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
+<<<<<<< ec6bb27e8f459ad39e89b10bd2f7c258157b8e6f
 ActiveRecord::Schema.define(version: 20_170_427_124_906) do
+=======
+ActiveRecord::Schema.define(version: 20170510060126) do
+
+>>>>>>> Added organizations and contacts resources
   # These are extensions that must be enabled in order to support this database
   enable_extension 'plpgsql'
 
+<<<<<<< ec6bb27e8f459ad39e89b10bd2f7c258157b8e6f
   create_table 'organizations', force: :cascade do |t|
     t.string   'name'
     t.text     'description'
     t.datetime 'created_at',  null: false
     t.datetime 'updated_at',  null: false
+=======
+  create_table "clients", force: :cascade do |t|
+    t.string "email"
+    t.string "uuid"
+    t.string "key"
+  end
+
+  create_table "organizations", force: :cascade do |t|
+    t.string   "name"
+    t.text     "description"
+    t.datetime "created_at",  null: false
+    t.datetime "updated_at",  null: false
+>>>>>>> Added organizations and contacts resources
   end
 
   create_table 'organizations_users', id: false, force: :cascade do |t|
@@ -28,6 +47,7 @@ ActiveRecord::Schema.define(version: 20_170_427_124_906) do
     t.index ['user_id'], name: 'index_organizations_users_on_user_id', using: :btree
   end
 
+<<<<<<< ec6bb27e8f459ad39e89b10bd2f7c258157b8e6f
   create_table 'user_types', force: :cascade do |t|
     t.string   'name'
     t.datetime 'created_at', null: false
@@ -41,5 +61,23 @@ ActiveRecord::Schema.define(version: 20_170_427_124_906) do
     t.datetime 'created_at',      null: false
     t.datetime 'updated_at',      null: false
     t.index ['user_type_id'], name: 'index_users_on_user_type_id', using: :btree
+=======
+  create_table "user_types", force: :cascade do |t|
+    t.string "name"
+  end
+
+  create_table "users", force: :cascade do |t|
+    t.string   "email"
+    t.string   "password_digest"
+    t.string   "first_name"
+    t.string   "last_name"
+    t.string   "middle_name"
+    t.date     "date_of_birth"
+    t.string   "avatar_url"
+    t.integer  "user_type_id"
+    t.datetime "created_at",      null: false
+    t.datetime "updated_at",      null: false
+    t.index ["user_type_id"], name: "index_users_on_user_type_id", using: :btree
+>>>>>>> Added organizations and contacts resources
   end
 end
