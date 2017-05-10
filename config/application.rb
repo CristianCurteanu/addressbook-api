@@ -27,5 +27,6 @@ module AddressbookApp
     config.paths.add File.join('app', 'api'), glob: File.join('**', '*.rb')
     config.autoload_paths += Dir[Rails.root.join('app', 'api', '*')]
     config.autoload_paths << Rails.root.join('app', 'services')
+    config.assets.initialize_on_precompile = false
   end
 end
