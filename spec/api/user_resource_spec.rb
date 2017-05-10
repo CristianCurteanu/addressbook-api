@@ -7,6 +7,10 @@ describe AddressBook::UsersResource do
                            password: 'some.password')
     @user.organizations << Organization.create!(name: 'Some Organization Inc.')
     @user.organizations << Organization.create!(name: 'Second Organization Inc.')
+    uuid = SecureRandom.uuid
+    @client = Client.create!(email: @user.email, 
+                             uuid:  uuid, 
+                             key: JWT.encode(@user.email, uuid))
   end
 
   let(:user_organizations) do
@@ -41,7 +45,8 @@ describe AddressBook::UsersResource do
 
     it 'should return current authenticated user' do
       post '/session', params: { email: 'some.email@gmail.com',
-                                 password: 'some.password' }
+                                 uuid: @client.key,
+                                 password: JWT.encode('some.password', @client.key)}
       expect_status 201
       user_json = { email: @user.email,
                     type: @user.type.name,
