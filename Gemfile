@@ -41,9 +41,12 @@ gem 'grape'
 gem 'grape-rails-cache'
 gem 'grape-swagger'
 gem 'grape-swagger-rails'
+gem 'redcarpet'
+gem 'rouge'
 gem 'firebase'
 gem 'hashie-forbidden_attributes'
 gem 'virtus'
+gem 'faker'
 
 group :development, :test do
   # Call 'byebug' anywhere in the code to stop execution and get a debugger console
@@ -66,7 +69,6 @@ group :test do
   gem 'webmock'
   gem 'shoulda'
   gem 'database_cleaner'
-  gem 'faker'
 end
 
 # Windows does not include zoneinfo files, so bundle the tzinfo-data gem

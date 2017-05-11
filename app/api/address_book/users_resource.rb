@@ -15,6 +15,9 @@ module AddressBook
       optional :limit, type: Integer
       optional :start, type: Integer
     end
+    desc 'Get a list of all users' do
+      detail 'You can specify limit and offset (`start` parameter)'
+    end
     get :users do
       # TODO: REFACTOR THIS!!!
       users = if params[:limit]
@@ -34,13 +37,14 @@ module AddressBook
     resource :user do
 
       # GET /user/:id
-      desc 'REST Post with attributes param.'
+      desc 'Find user by :id and get information'
       get ':id' do
         user = User.find_by_id(params[:id])
         user.nil? ? error!({ message: 'User not found' }, 404) : format_user(user)
       end
 
       # GET /user
+      desc 'Return current user information'
       get do
         if current_user.nil?
           error!('Unauthorized', 401)
@@ -67,6 +71,9 @@ module AddressBook
 
         optional :organizations, type: Array[Integer]
       end
+      desc 'Create user' do 
+        detail 'Only Admin user can use this endpoint'
+      end
       post do
         error!('Unauthorized', 401) unless admin?
         user = User.new(registration_params)
@@ -80,16 +87,21 @@ module AddressBook
       params do
         requires :field, type: String, message: 'unknown'
         requires :value, type: String, message: :value_required
-        optional :id
+        requires :id
         all_or_none_of :field, :value
       end
+      desc 'Update user by :id' do 
+        detail 'Only Admin user can use this endpoint'
+      end
       put ':id/:field' do
+        error('Unauthorized', 401) unless admin?
         user = User.find_by_id(params[:id])
         return error!('User not found', 404) unless user
         'OK' if user.update(params[:field].to_sym => params[:value])
       end
 
       # PUT /user/:field
+      desc 'Update current user'
       params do
         requires :field, type: String, message: 'unknown'
         requires :value, type: String, message: :value_required
@@ -102,6 +114,7 @@ module AddressBook
       end
 
       # POST /user/organization
+      desc 'Connect user and organization by user_id and organization_id'
       params do 
         requires :organization_id, type: Integer
         optional :user_id, type: Integer
@@ -117,6 +130,9 @@ module AddressBook
       end
 
       # DELETE /user/:id
+      desc 'Remove specified user' do 
+        detail 'User can be removed only by admin, and it should be specified :id of the user'
+      end
       params do 
         requires :id, type: Integer
       end

@@ -2,9 +2,6 @@ module Base
   class API < Grape::API
     format :json
 
-    add_swagger_documentation #hide_documentation_path: true,
-                              #hide_format: true
-
     rescue_from Grape::Exceptions::ValidationErrors do |e|
       error! e.full_messages.first, 400 if Rails.env.development? || Rails.env.test?
     end
@@ -61,7 +58,7 @@ module Base
       end
 
       def client_key
-        Client.find_by_uuid(params[:key]).key
+        Client.find_by_uuid(cookies[:uuid] || params[:uuid]).key
       end
 
       def user_data
@@ -69,11 +66,14 @@ module Base
       end
     end
 
-    desc 'Authenticate client via email and password parameters'
+    desc 'Authenticate client via email and password parameters' do 
+      detail 'See repository wiki in order to see how to encrypt password on client side.
+              Also for passing uuid to API, can be used `uuid` cookie'
+    end
     params do
       requires :email,    type: String
       requires :password, type: String
-      requires :key
+      optional :uuid
     end
     post :session do
       if authentication.success?
@@ -86,13 +86,16 @@ module Base
     params do
       requires :email, type: String
       requires :password
-      requires :key
+      optional :uuid
       optional :type_id
       optional :first_name
       optional :last_name
       optional :middle_name 
       optional :date_of_birth 
       optional :avatar
+    end
+    desc 'Register users' do 
+      detail 'Also for passing uuid to API, can be used `uuid` cookie'
     end
     post :register do
       user = User.create!(registration_params)
@@ -102,6 +105,7 @@ module Base
     params do
       requires :email
     end
+    desc 'Generate UUID for Client Application'
     post 'client/token' do
       uuid = SecureRandom.uuid
       datas = { email: params[:email],
@@ -112,5 +116,13 @@ module Base
 
     mount AddressBook::OrganizationResource
     mount AddressBook::UsersResource
+
+    add_swagger_documentation hide_documentation_path: true,
+                              hide_format: true,
+                              markdown: GrapeSwagger::Markdown::RedcarpetAdapter
+                                .new(render_options: { highlighter: :rouge }),
+                              info: {
+                                title: 'API Documentation'
+                              }
   end
 end
