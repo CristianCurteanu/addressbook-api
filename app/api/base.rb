@@ -66,6 +66,10 @@ module Base
       end
     end
 
+    get '/' do 
+      { organizations: '/organizations', users: '/users' }
+    end
+
     desc 'Authenticate client via email and password parameters' do 
       detail 'See repository wiki in order to see how to encrypt password on client side.
               Also for passing uuid to API, can be used `uuid` cookie'
