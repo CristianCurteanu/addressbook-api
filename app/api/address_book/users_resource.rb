@@ -84,6 +84,7 @@ module AddressBook
         all_or_none_of :field, :value
       end
       put ':id/:field' do
+        error('Unauthorized', 401) unless admin?
         user = User.find_by_id(params[:id])
         return error!('User not found', 404) unless user
         'OK' if user.update(params[:field].to_sym => params[:value])
