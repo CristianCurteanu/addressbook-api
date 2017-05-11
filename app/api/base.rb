@@ -46,11 +46,10 @@ module Base
         type_name = if params[:type_id]
                       UserType.find(params[:type_id]).name
                     else
-                      'USER'          
+                      'USER'
                     end
-        params.slice(*user_data.map(&:to_s)).merge(password: password, 
-                                    type:     UserType.find_by_name(type_name))
-
+        params.slice(*user_data.map(&:to_s)).merge(password: password,
+                                                   type:     UserType.find_by_name(type_name))
       end
 
       def password
@@ -66,11 +65,11 @@ module Base
       end
     end
 
-    get '/' do 
+    get '/' do
       { organizations: '/organizations', users: '/users' }
     end
 
-    desc 'Authenticate client via email and password parameters' do 
+    desc 'Authenticate client via email and password parameters' do
       detail 'See repository wiki in order to see how to encrypt password on client side.
               Also for passing uuid to API, can be used `uuid` cookie'
     end
@@ -94,11 +93,11 @@ module Base
       optional :type_id
       optional :first_name
       optional :last_name
-      optional :middle_name 
-      optional :date_of_birth 
+      optional :middle_name
+      optional :date_of_birth
       optional :avatar
     end
-    desc 'Register users' do 
+    desc 'Register users' do
       detail 'Also for passing uuid to API, can be used `uuid` cookie'
     end
     post :register do
@@ -113,7 +112,7 @@ module Base
     post 'client/token' do
       uuid = SecureRandom.uuid
       datas = { email: params[:email],
-                uuid:  uuid, 
+                uuid:  uuid,
                 key:   JWT.encode(params[:email], uuid) }
       datas.slice(:uuid) if Client.create!(datas)
     end

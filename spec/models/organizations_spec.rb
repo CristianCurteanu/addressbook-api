@@ -6,17 +6,20 @@ describe Organization, type: :model do
   end
 
   it 'should be valid with name' do
-    expect(Organization.new).not_to be_valid
-    expect(Organization.new(name: 'Sample Organization Inc.')).to be_valid
+    expect(described_class.new).not_to be_valid
+    expect(described_class.new(name: 'Sample Organization Inc.')).to be_valid
   end
 
   it 'should be able to add users' do
-    organization = Organization.new(name: 'Sample Organization Inc.')
+    organization = described_class.new(name: 'Sample Organization Inc.')
     organization.users << User.new(email: 'some.email@gmail.com')
     expect(organization.users).to be_present
   end
 
-  # TODO
-  it 'should serialize with contacts' do 
+  it 'should serialize with contacts' do
+    organization = described_class.new(name: 'Sample Organization Inc.')
+    stub_request(:get, organization_by_id(organization.id))
+      .to_return(body: {}.to_json)
+    expect(organization.contacts.get.to_json).to eql({}.to_json)
   end
 end

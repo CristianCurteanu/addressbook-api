@@ -1,12 +1,11 @@
 module AddressBook
   class UsersResource < Grape::API
-
     helpers do
       def format_user(user)
         datas = user.attributes.slice(*user_data.map(&:to_s))
-          .merge(type: user.type.name,
-                 organizations: user.organizations.select(:id, :name))
-        datas.delete_if { |k, v| v.nil? }
+                    .merge(type: user.type.name,
+                           organizations: user.organizations.select(:id, :name))
+        datas.delete_if { |_k, v| v.nil? }
       end
     end
 
@@ -35,7 +34,6 @@ module AddressBook
     end
 
     resource :user do
-
       # GET /user/:id
       desc 'Find user by :id and get information'
       get ':id' do
@@ -54,24 +52,24 @@ module AddressBook
       end
 
       # POST /user
-      params do 
+      params do
         requires :email, type: String
         requires :password, type: String
         requires :type_id, type: Integer
 
         requires :email, type: String
         requires :password
-        requires :key
+        requires :uuid
         optional :type_id
         optional :first_name
         optional :last_name
-        optional :middle_name 
-        optional :date_of_birth 
+        optional :middle_name
+        optional :date_of_birth
         optional :avatar
 
         optional :organizations, type: Array[Integer]
       end
-      desc 'Create user' do 
+      desc 'Create user' do
         detail 'Only Admin user can use this endpoint'
       end
       post do
@@ -90,11 +88,11 @@ module AddressBook
         requires :id
         all_or_none_of :field, :value
       end
-      desc 'Update user by :id' do 
+      desc 'Update user by :id' do
         detail 'Only Admin user can use this endpoint'
       end
       put ':id/:field' do
-        error('Unauthorized', 401) unless admin?
+        error!('Unauthorized', 401) unless admin?
         user = User.find_by_id(params[:id])
         return error!('User not found', 404) unless user
         'OK' if user.update(params[:field].to_sym => params[:value])
@@ -110,12 +108,12 @@ module AddressBook
       put ':field' do
         return error!('Unauthorized', 401) unless current_user
         'OK' if current_user.update(params[:field].to_sym => params[:value]) &&
-          !['organizations', 'type', 'organization_id', 'type_id'].include?(params[:field])
+                !%w(organizations type organization_id type_id).include?(params[:field])
       end
 
       # POST /user/organization
       desc 'Connect user and organization by user_id and organization_id'
-      params do 
+      params do
         requires :organization_id, type: Integer
         optional :user_id, type: Integer
       end
@@ -123,20 +121,20 @@ module AddressBook
         return error!('Organization missing', 404) unless Organization.find_by_id(params[:organization_id])
         return error!('No user found', 404) unless params[:user_id] || current_user
         user = params[:user_id].present? ? User.find_by_id(params[:user_id]) : current_user
-        return {message: 'Already exists'} if 
-          user.organizations.any? { |org| org.id.eql?(params[:organization_id])}
+        return { message: 'Already exists' } if
+          user.organizations.any? { |org| org.id.eql?(params[:organization_id]) }
         user.organizations << Organization.find_by_id(params[:organization_id])
         'OK' if user.save
       end
 
       # DELETE /user/:id
-      desc 'Remove specified user' do 
+      desc 'Remove specified user' do
         detail 'User can be removed only by admin, and it should be specified :id of the user'
       end
-      params do 
+      params do
         requires :id, type: Integer
       end
-      delete ':id' do 
+      delete ':id' do
         error!('Unauthorized', 401) unless admin?
         'OK' if User.find(params[:id]).destroy
       end

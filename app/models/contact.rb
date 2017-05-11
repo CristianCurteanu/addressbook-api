@@ -25,7 +25,7 @@ class Contact
   end
 
   def delete(key)
-    client.set(path, get.delete_if { |h| h.key?(key)})
+    client.set(path, get.delete_if { |h| h.key?(key) })
   end
 
   def delete_all

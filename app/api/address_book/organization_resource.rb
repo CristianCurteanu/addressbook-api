@@ -1,9 +1,8 @@
 module AddressBook
   class OrganizationResource < Grape::API
-
-    helpers do 
+    helpers do
       def wrap_up(organization)
-        { 
+        {
           id: organization.id,
           name: organization.name,
           contacts: organization.contacts.get
@@ -15,18 +14,18 @@ module AddressBook
 
     # GET /organizations
     desc 'Return list of all organizations'
-    get :organizations do 
+    get :organizations do
       organizations = Organization.limit(params[:limit] || 10).order('id DESC')
+      error!('No organization found', 404) if organizations.empty?
       organizations.each_with_object([]) do |organization, result|
         result << wrap_up(organization)
-      end  
+      end
     end
 
     resource :organization do
-
       desc 'Find organization by :id'
       # GET /organization/:id
-      params do 
+      params do
         requires :id, type: Integer
       end
       get ':id' do
@@ -38,15 +37,15 @@ module AddressBook
       params do
         requires :name, type: String
       end
-      post do 
+      post do
         error!('Unauthorized', 401) unless admin?
         organization = Organization.new(name: params[:name])
         { message: 'OK' } if organization.save
       end
 
       # POST /organization/contact
-      desc 'Add organization contact' do 
-        detail 'Find organization by organization_id parameter, and update with data. 
+      desc 'Add organization contact' do
+        detail 'Find organization by organization_id parameter, and update with data.
                   Data can have any JSON structure that client application is comfortable with'
       end
       params do
@@ -65,13 +64,14 @@ module AddressBook
         requires :id, type: Integer
         requires :field, type: String
       end
-      put ':id/:field' do 
+      put ':id/:field' do
+        error!('Unauthorized', 401) unless current_user
         organization = Organization.find(params[:id])
         { message: 'OK' } if organization.update(params[:field].to_sym => params[:value])
       end
 
       # PUT /organization/contacts
-      desc 'Update contact information' do 
+      desc 'Update contact information' do
         detail 'Specify :name of object, :data which should be updated and organization :id'
       end
       params do
@@ -79,16 +79,17 @@ module AddressBook
         requires :data
         requires :key
       end
-      put 'contacts' do 
+      put 'contacts' do
+        error!('Unauthorized', 401) unless current_user
         organization = Organization.find(params[:id])
         { message: 'OK' } if organization.contacts.update(params[:key], params[:data])
       end
 
       # DELETE /organization/:id
-      desc 'Delete specified company' do 
+      desc 'Delete specified company' do
         detail 'Admin access only'
       end
-      params do 
+      params do
         requires :id, type: Integer
       end
       delete ':id' do
@@ -100,7 +101,7 @@ module AddressBook
 
       # DELETE /organization/:id/contacts
       desc 'Delete all contacts for organization specified by :id'
-      params do 
+      params do
         requires :id, type: Integer
       end
       delete ':id/contacts' do
@@ -109,7 +110,7 @@ module AddressBook
       end
 
       # DELETE /organization/:id/contact
-      desc 'Delete single contact data' do 
+      desc 'Delete single contact data' do
         detail 'For contact data stored by :key value and organization with specific :id'
       end
       params do

@@ -8,8 +8,8 @@ describe AddressBook::UsersResource do
     @user.organizations << Organization.create!(name: 'Some Organization Inc.')
     @user.organizations << Organization.create!(name: 'Second Organization Inc.')
     uuid = SecureRandom.uuid
-    @client = Client.create!(email: @user.email, 
-                             uuid:  uuid, 
+    @client = Client.create!(email: @user.email,
+                             uuid:  uuid,
                              key: JWT.encode(@user.email, uuid))
   end
 
@@ -45,8 +45,8 @@ describe AddressBook::UsersResource do
 
     it 'should return current authenticated user' do
       post '/session', params: { email: 'some.email@gmail.com',
-                                 uuid: @client.key,
-                                 password: JWT.encode('some.password', @client.key)}
+                                 uuid: @client.uuid,
+                                 password: JWT.encode('some.password', @client.key) }
       expect_status 201
       user_json = { email: @user.email,
                     type: @user.type.name,
@@ -60,7 +60,9 @@ describe AddressBook::UsersResource do
 
   context 'PUT /user/email/:id' do
     it 'should have email parameter' do
-      put "/user/email/#{@user.id}", params: { value: Faker::Internet.email }
+      put "/user/#{@user.id}/email", params: { value: Faker::Internet.email },
+                                     headers: { 'Authorization' => token_for(:admin),
+                                                'Cookies' => "uuid=#{@client.uuid}" }
       expect_status 200
       expect(response.body).to eql 'OK'.to_json
     end
@@ -73,7 +75,9 @@ describe AddressBook::UsersResource do
     end
 
     it 'should return 404 if no user found' do
-      put "/user/email/#{@user.id + 1}", params: { value: Faker::Internet.email }
+      put "/user/email/#{@user.id + 1}", params: { value: Faker::Internet.email },
+                                         headers: { 'Authorization' => token_for(:admin),
+                                                    'Cookies' => "uuid=#{@client.uuid}" }
       expect_status 404
       error_response = { error: 'User not found' }.to_json
       expect(response.body).to eql error_response
@@ -91,8 +95,9 @@ describe AddressBook::UsersResource do
     end
 
     it 'should have email parameter' do
-      post '/session', params: { email:    'some.email@gmail.com',
-                                 password: 'some.password' }
+      post '/session', params: { email: 'some.email@gmail.com',
+                                 uuid: @client.uuid,
+                                 password: JWT.encode('some.password', @client.key) }
       expect_status 201
       put '/user/email', params:  { value: @new_email },
                          headers: { 'Authorization' => JSON.parse(response.body)['token'] }
@@ -123,24 +128,6 @@ describe AddressBook::UsersResource do
   end
 
   context 'DELETE /user/:id' do
-    def create_mock_user(type)
-      password = Faker::Internet.password
-      user = User.create(email: Faker::Internet.email,
-                         type: UserType.create!(name: type),
-                         password: password)
-      { user: user, password: password }
-    end
-
-    def delete_user_by_admin
-      admin = create_mock_user('ADMIN')
-      post '/session', params: { email:    admin[:user].email,
-                                 password: admin[:password] }
-      expect_status 201
-      user = create_mock_user('USER')[:user]
-      delete "/user/#{user.id}", headers: { 'Authorization' => JSON.parse(response.body)['token'] }
-      user.id
-    end
-
     it 'should respond with 401 if current user is not ADMIN' do
       user = create_mock_user('USER')[:user]
       delete "/user/#{user.id}"
