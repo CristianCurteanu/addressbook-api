@@ -2,9 +2,6 @@ module Base
   class API < Grape::API
     format :json
 
-    add_swagger_documentation #hide_documentation_path: true,
-                              #hide_format: true
-
     rescue_from Grape::Exceptions::ValidationErrors do |e|
       error! e.full_messages.first, 400 if Rails.env.development? || Rails.env.test?
     end
@@ -102,6 +99,7 @@ module Base
     params do
       requires :email
     end
+    desc 'Generate UUID for client application'
     post 'client/token' do
       uuid = SecureRandom.uuid
       datas = { email: params[:email],
@@ -112,5 +110,13 @@ module Base
 
     mount AddressBook::OrganizationResource
     mount AddressBook::UsersResource
+
+    add_swagger_documentation hide_documentation_path: true,
+                              hide_format: true,
+                              markdown: GrapeSwagger::Markdown::RedcarpetAdapter
+                                .new(render_options: { highlighter: :rouge }),
+                              info: {
+                                title: 'API Documentation'
+                              }
   end
 end
