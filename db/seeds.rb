@@ -3,7 +3,7 @@ require 'faker'
 # User types
 [{name: 'USER'}, 
  {name: 'ADMIN'}].each do |type| 
-   UserType.create!(type) }
+   UserType.create!(type)
 end
 
 # Create Admin
