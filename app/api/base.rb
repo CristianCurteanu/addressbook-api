@@ -66,7 +66,10 @@ module Base
       end
     end
 
-    desc 'Authenticate client via email and password parameters'
+    desc 'Authenticate client via email and password parameters' do 
+      detail 'See repository wiki in order to see how to encrypt password on client side.
+              Also for passing uuid to API, can be used `uuid` cookie'
+    end
     params do
       requires :email,    type: String
       requires :password, type: String
@@ -91,6 +94,9 @@ module Base
       optional :date_of_birth 
       optional :avatar
     end
+    desc 'Register users' do 
+      detail 'Also for passing uuid to API, can be used `uuid` cookie'
+    end
     post :register do
       user = User.create!(registration_params)
       { token: authentication.result } if authentication.success?
@@ -99,7 +105,7 @@ module Base
     params do
       requires :email
     end
-    desc 'Generate UUID for client application'
+    desc 'Generate UUID for Client Application'
     post 'client/token' do
       uuid = SecureRandom.uuid
       datas = { email: params[:email],
