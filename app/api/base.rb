@@ -61,7 +61,7 @@ module Base
       end
 
       def client_key
-        Client.find_by_uuid(params[:key]).key
+        Client.find_by_uuid(cookies[:uuid] || params[:uuid]).key
       end
 
       def user_data
@@ -73,7 +73,7 @@ module Base
     params do
       requires :email,    type: String
       requires :password, type: String
-      requires :key
+      optional :uuid
     end
     post :session do
       if authentication.success?
@@ -86,7 +86,7 @@ module Base
     params do
       requires :email, type: String
       requires :password
-      requires :key
+      optional :uuid
       optional :type_id
       optional :first_name
       optional :last_name
