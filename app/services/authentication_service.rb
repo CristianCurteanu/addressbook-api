@@ -1,13 +1,17 @@
 class AuthenticationService
   prepend SimpleCommand
 
-  def initialize(email, password)
-    @email = email
-    @password = password
+  def initialize(options = {})
+    @email = options[:email]
+    @password = options[:password]
   end
 
   def call
-    WebTokenHelper.encode(user_id: user.id) if user
+    return WebTokenHelper.encode(user_id: user.id) if user
+  end
+
+  def self.destroy(token)
+    WebTokenHelper.encode({ user_id: WebTokenHelper.decode(token) }, 1.minute.ago)
   end
 
   private

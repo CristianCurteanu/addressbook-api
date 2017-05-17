@@ -6,16 +6,22 @@ class Contact
   attribute :organization, Organization
 
   def get
-    client.get(path).body || []
+    contacts = client.get(path).body || []
+    if contacts.is_a?(Hash)
+      contacts.each_with_object([]) { |contact, arr| arr << contact.last }
+    else
+      contacts
+    end
   end
 
   def add(contact)
     response = get
-    return false if response.select { |k| k.key?(contact.keys[0]) }.length > 2
+    return unless response.select { |k| k.key?(contact.keys[0]) }.length.zero?
     client.set(path, response.push(contact))
   end
 
   def update(key, data)
+    return unless key.present? || data
     response = get
     return false if response.empty?
     response[response.index { |r| r.key?(key) }][key] = data
@@ -25,6 +31,8 @@ class Contact
   end
 
   def delete(key)
+    response = get
+    return unless response.empty? || !response.select { |k| k.key?(key) }.length.zero?
     client.set(path, get.delete_if { |h| h.key?(key) })
   end
 

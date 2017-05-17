@@ -76,5 +76,5 @@ RSpec.configure do |config|
 end
 
 Airborne.configure do |c|
-  c.rack_app = Base::API
+  # c.rack_app = Base::API
 end

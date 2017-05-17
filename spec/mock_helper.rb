@@ -2,9 +2,10 @@ module MockHelper
   def token_for(type)
     user = create_mock_user(type.to_s.upcase)
     post '/session', params: { email: user[:user].email,
-                               uuid: @client.uuid,
-                               password: JWT.encode(user[:user].password, @client.key) }
-    expect_status 201
+                               password: JWT.encode(user[:user].password, @client.key) },
+                     headers: { Accept: 'application/json',
+                                Cookie: "uuid=#{@client.uuid}" }
+    expect_status 200
     JSON.parse(response.body)['token']
   end
 
@@ -22,8 +23,8 @@ module MockHelper
 
   def delete_user_by_admin
     user = create_mock_user('USER')[:user]
-    delete "/user/#{user.id}", headers: { 'Authorization' => token_for(:admin) },
-                               params: { uuid: @client.uuid }
+    delete "/user/#{user.id}", headers: { Authorization: token_for(:admin),
+                                          Accept: 'application/json' }
     user.id
   end
 
