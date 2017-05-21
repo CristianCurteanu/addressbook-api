@@ -8,10 +8,6 @@ module ApplicationHelper
     render json: { message: (message || 'OK') }, status: 200
   end
 
-  def json?
-    request.accept.eql?('application/json')
-  end
-
   def limit
     params[:limit] || 25
   end

@@ -7,11 +7,7 @@ class AuthenticationService
   end
 
   def call
-    return WebTokenHelper.encode(user_id: user.id) if user
-  end
-
-  def self.destroy(token)
-    WebTokenHelper.encode({ user_id: WebTokenHelper.decode(token) }, 1.minute.ago)
+    WebTokenHelper.encode(user_id: user.id) if user
   end
 
   private

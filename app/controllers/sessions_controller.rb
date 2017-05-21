@@ -10,6 +10,8 @@ class SessionsController < ApplicationController
   def create
     authentication ||= AuthenticationService.call(credentials)
     if authentication && authentication.success?
+      SessionToken.create!(token: authentication.result,
+                           expires_at: 30.minutes.from_now)
       render json: { token: authentication.result }
     else
       error! 401, error: 'Authentication failed, check you credentials'
@@ -17,7 +19,11 @@ class SessionsController < ApplicationController
   end
 
   def destroy
-    AuthenticationService.destroy(request.headers['Authorization'])
+    if SessionToken.find_by_token(request.headers['Authorization']).logout
+      return error!(401, message: 'Logged out')
+    end
+  rescue NoMethodError
+    error! 404, { error: 'Session not found' }
   end
 
   private

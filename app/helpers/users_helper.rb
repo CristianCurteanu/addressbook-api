@@ -5,7 +5,8 @@ module UsersHelper
 
   def current_user
     authorization ||= AuthorizationService.call(request.headers)
-    return authorization.result if authorization.success?
+    return authorization.result if authorization.success? &&
+      !SessionToken.expired?(request.headers['Authorization'])
   end
 
   def format_user(user)
