@@ -12,6 +12,10 @@ module ApplicationHelper
     request.accept.eql?('application/json')
   end
 
+  def limit
+    params[:limit] || 25
+  end
+
   private
 
   def admin_authorized?

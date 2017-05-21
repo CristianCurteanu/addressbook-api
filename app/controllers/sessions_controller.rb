@@ -3,6 +3,10 @@ class SessionsController < ApplicationController
     error! 400, error: 'Parameters are not valid' unless valid_credentials?
   end
 
+  api :POST, '/session', 'Create a new session token'
+  header :Cookie, 'Provide `uuid` key as cookie', required: true
+  param :email, String, desc: 'User`s email', required: true
+  param :password, String, desc: 'User`s password', required: true
   def create
     authentication ||= AuthenticationService.call(credentials)
     if authentication && authentication.success?

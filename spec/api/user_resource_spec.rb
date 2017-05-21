@@ -63,7 +63,7 @@ describe 'Users' do
     end
   end
 
-  context 'PUT /user/email/:id' do
+  context 'PUT /user/:id/email' do
     it 'should have email parameter' do
       put "/user/#{@user.id}/email", params: { value: Faker::Internet.email },
                                      headers: { Authorization: token_for(:admin),
@@ -72,7 +72,7 @@ describe 'Users' do
       expect(response.body).to eql({ message: 'OK'}.to_json)
     end
 
-    it 'should return 400 if there is no parameter' do
+    it 'should return 422 if there is no parameter' do
       put "/user/#{@user.id}/email", headers: { Authorization: token_for(:admin),
                                                 Accept: 'application/json' }
       expect_status 422
@@ -115,14 +115,16 @@ describe 'Users' do
     it 'should return 404 if organization does not exist' do
       post '/user/organization', params: { organization_id: @organization.id + 1,
                                             user_id:         @user.id },
-                                 headers: { Accept: 'application/json' }
+                                 headers: { Accept: 'application/json',
+                                            Authorization: token_for(:admin) }
       expect_status 404
     end
 
     it 'should be able to add new organization' do
       post '/user/organization', params: { organization_id: @organization.id,
                                             user_id:         @user.id },
-                                 headers: { Accept: 'application/json' }
+                                 headers: { Accept: 'application/json',
+                                            Authorization: token_for(:admin) }
       expect_status 200
       expect(response.body).to eql({ message: 'OK' }.to_json)
     end
