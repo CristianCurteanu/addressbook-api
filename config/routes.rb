@@ -1,4 +1,5 @@
 Rails.application.routes.draw do
+  apipie
   resource :session, only: [:create, :destroy]
   post 'register', to: 'users#create'
 
