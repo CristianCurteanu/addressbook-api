@@ -1,6 +1,6 @@
 require 'rails_helper'
 
-describe AddressBook::UsersResource do
+describe 'Users' do
   before(:all) do
     @user ||= User.create!(email: 'some.email@gmail.com',
                            type: UserType.create!(name: 'USER'),
@@ -21,66 +21,63 @@ describe AddressBook::UsersResource do
 
   context 'GET /user/:id' do
     it 'should return a user by id' do
-      user_json = { email: @user.email,
+      user_json = { id: @user.id,
+                    email: @user.email,
                     type: @user.type.name,
                     organizations: user_organizations }
-      get "/user/#{@user.id}"
+      get "/user/#{@user.id}", headers: { Accept: 'application/json' }
       expect_status 200
       expect(response.body).to eql user_json.to_json
     end
 
     it 'should return 404 if no user found' do
-      get "/user/#{User.maximum(:id).to_i.next}"
+      id = User.maximum(:id).to_i.next
+      get "/user/#{id}", headers: { Accept: 'application/json' }
       expect_status 404
-      expect_json(message: 'User not found')
+      expect_json(message: "Couldn't find User with 'id'=#{id}")
     end
   end
 
   context 'GET /user' do
     it 'should return 401 Unauthorized if there is no session created' do
-      get '/user'
+      get '/user', headers: { Accept: 'application/json' }
       expect_status 401
       expect_json error: 'Unauthorized'
     end
 
     it 'should return current authenticated user' do
       post '/session', params: { email: 'some.email@gmail.com',
-                                 uuid: @client.uuid,
-                                 password: JWT.encode('some.password', @client.key) }
-      expect_status 201
-      user_json = { email: @user.email,
-                    type: @user.type.name,
+                                 password: JWT.encode('some.password', @client.key) },
+                       headers: { Accept: 'application/json',
+                                  Cookie: "uuid=#{@client.uuid}" }
+      expect_status 200
+      user_json = { id:    @user.id,
+                    email: @user.email,
+                    type:  @user.type.name,
                     organizations: user_organizations }
       get '/user', params:  nil,
-                   headers: { 'Authorization' => JSON.parse(response.body)['token'] }
+                   headers: { Accept: 'application/json',
+                              Authorization: JSON.parse(response.body)['token']}
       expect_status 200
       expect(response.body).to eql user_json.to_json
     end
   end
 
-  context 'PUT /user/email/:id' do
+  context 'PUT /user/:id/email' do
     it 'should have email parameter' do
       put "/user/#{@user.id}/email", params: { value: Faker::Internet.email },
-                                     headers: { 'Authorization' => token_for(:admin),
-                                                'Cookies' => "uuid=#{@client.uuid}" }
+                                     headers: { Authorization: token_for(:admin),
+                                                Accept: 'application/json' }
       expect_status 200
-      expect(response.body).to eql 'OK'.to_json
+      expect(response.body).to eql({ message: 'OK'}.to_json)
     end
 
-    it 'should return 400 if there is no parameter' do
-      put "/user/email/#{@user.id}"
-      expect_status 400
-      error_response = { error: 'Value parameter empty' }.to_json
-      expect(response.body).to eql error_response
-    end
-
-    it 'should return 404 if no user found' do
-      put "/user/email/#{@user.id + 1}", params: { value: Faker::Internet.email },
-                                         headers: { 'Authorization' => token_for(:admin),
-                                                    'Cookies' => "uuid=#{@client.uuid}" }
-      expect_status 404
-      error_response = { error: 'User not found' }.to_json
-      expect(response.body).to eql error_response
+    it 'should return 422 if there is no parameter' do
+      put "/user/#{@user.id}/email", headers: { Authorization: token_for(:admin),
+                                                Accept: 'application/json' }
+      expect_status 422
+      error_response = { message: { email: ["can't be blank", "is invalid"] } }
+      expect(response.body).to eql error_response.to_json
     end
   end
 
@@ -90,47 +87,53 @@ describe AddressBook::UsersResource do
     end
 
     it 'should return 401 if not authenticated' do
-      put '/user/email', params: { value: @new_email }
+      put '/user/email', params: { value: @new_email },
+                         headers: { Accept: 'application/json' }
       expect_status 401
     end
 
     it 'should have email parameter' do
       post '/session', params: { email: 'some.email@gmail.com',
-                                 uuid: @client.uuid,
-                                 password: JWT.encode('some.password', @client.key) }
-      expect_status 201
+                                 password: JWT.encode('some.password', @client.key) },
+                       headers: { Accept: 'application/json',
+                                  Cookie: "uuid=#{@client.uuid}" }
+      expect_status 200
       put '/user/email', params:  { value: @new_email },
-                         headers: { 'Authorization' => JSON.parse(response.body)['token'] }
+                         headers: { Authorization: JSON.parse(response.body)['token'],
+                                    Accept: 'application/json' }
 
       expect_status 200
-      expect(response.body).to eql 'OK'.to_json
+      expect(response.body).to eql({ message: 'OK' }.to_json)
     end
   end
 
-  context 'POST /user/organizations' do
+  context 'POST /user/organization' do
     before do
       @organization = Organization.create!(name: Faker::Company.name)
     end
 
     it 'should return 404 if organization does not exist' do
-      post '/user/organizations', params: { organization_id: @organization.id + 1,
-                                            user_id:         @user.id }
+      post '/user/organization', params: { organization_id: @organization.id + 1,
+                                            user_id:         @user.id },
+                                 headers: { Accept: 'application/json',
+                                            Authorization: token_for(:admin) }
       expect_status 404
-      expect_json error: 'Organization missing'
     end
 
     it 'should be able to add new organization' do
-      post '/user/organizations', params: { organization_id: @organization.id,
-                                            user_id:         @user.id }
-      expect_status 201
-      expect(response.body).to eql 'OK'.to_json
+      post '/user/organization', params: { organization_id: @organization.id,
+                                            user_id:         @user.id },
+                                 headers: { Accept: 'application/json',
+                                            Authorization: token_for(:admin) }
+      expect_status 200
+      expect(response.body).to eql({ message: 'OK' }.to_json)
     end
   end
 
   context 'DELETE /user/:id' do
     it 'should respond with 401 if current user is not ADMIN' do
       user = create_mock_user('USER')[:user]
-      delete "/user/#{user.id}"
+      delete "/user/#{user.id}", headers: { Accept: 'application/json' }
       expect_status 401
       expect_json error: 'Unauthorized'
     end
@@ -138,12 +141,12 @@ describe AddressBook::UsersResource do
     it 'should respond with 200 if current user is ADMIN' do
       delete_user_by_admin
       expect_status 200
-      expect(response.body).to eql 'OK'.to_json
+      expect(response.body).to eql({message: 'OK'}.to_json)
     end
 
     it 'should remove the selected user' do
       user_id = delete_user_by_admin
-      get "/user/#{user_id}"
+      get "/user/#{user_id}", headers: { Accept: 'application/json' }
       expect_status 404
     end
   end

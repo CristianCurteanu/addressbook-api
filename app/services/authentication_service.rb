@@ -1,9 +1,9 @@
 class AuthenticationService
   prepend SimpleCommand
 
-  def initialize(email, password)
-    @email = email
-    @password = password
+  def initialize(options = {})
+    @email = options[:email]
+    @password = options[:password]
   end
 
   def call

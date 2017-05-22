@@ -20,6 +20,6 @@ describe Organization, type: :model do
     organization = described_class.new(name: 'Sample Organization Inc.')
     stub_request(:get, organization_by_id(organization.id))
       .to_return(body: {}.to_json)
-    expect(organization.contacts.get.to_json).to eql({}.to_json)
+    expect(organization.contacts.get.to_json).to eql([].to_json)
   end
 end
