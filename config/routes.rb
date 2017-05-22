@@ -2,6 +2,7 @@ Rails.application.routes.draw do
   apipie
   resource :session, only: [:create, :destroy]
   post 'register', to: 'users#create'
+  post 'client/token', to: 'client_applications#create'
 
   # Users resources
   post 'user', to: 'users#create'
