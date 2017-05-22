@@ -10,7 +10,17 @@ class ApplicationController < ActionController::Base
 
   rescue_from ActiveRecord::RecordNotFound, with: :record_not_found_exception
 
+  rescue_from NoMethodError, with: :display_nil_exception
+
+  if Rails.env.production?
+    rescue_from Exception, with: :display_nil_exception
+  end
+
   private
+
+  def display_nil_exception(ex)
+    error! 500, message: (Rails.env.production? ? 'Internal Server Error' : ex.message)
+  end
 
   def invalid_record_exception(ex)
     error! 422, message: ex.record.errors
