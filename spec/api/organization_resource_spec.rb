@@ -22,7 +22,8 @@ describe 'Organizations' do
     it 'get a list of organization' do
       stub_request(:get, organization_by_id(@organization.id))
         .to_return(body: {}.to_json)
-      get '/organizations', headers: { Accept: 'application/json' }
+      get '/organizations', headers: { Authorization: token_for(:user),
+                                       Accept: 'application/json' }
       expect_status 200
       target = [@organization.slice(:id, :name).merge(contacts: @organization.contacts.get)]
       expect(response.body).to eql target.to_json
@@ -30,7 +31,8 @@ describe 'Organizations' do
 
     it 'should return 404 response if no company found' do
       @organizations = Organization.delete_all
-      get '/organizations', headers: { Accept: 'application/json' }
+      get '/organizations', headers: { Authorization: token_for(:user),
+                                       Accept: 'application/json' }
       expect_status 404
       expect_json error: 'No organization found'
     end
@@ -39,7 +41,8 @@ describe 'Organizations' do
   context 'GET /organization/:id' do
     it 'should return 404 if company not found by id' do
       id = @organization.id + 1
-      get "/organization/#{id}", headers: { Accept: 'application/json' }
+      get "/organization/#{id}", headers: { Authorization: token_for(:user),
+                                            Accept: 'application/json' }
       expect_status 404
       expect_json message: "Couldn't find Organization with 'id'=#{id}"
     end
@@ -49,7 +52,10 @@ describe 'Organizations' do
         .to_return(body: {}.to_json)
       organization = @organization.slice(:id, :name)
                                   .merge(contacts: @organization.contacts.get)
-      get "/organization/#{@organization.id}", headers: { Accept: 'application/json' }
+      get "/organization/#{@organization.id}", headers: {
+                                                Authorization: token_for(:user),
+                                                Accept: 'application/json'
+                                              }
       expect_status 200
       expect(response.body).to eql organization.to_json
     end
@@ -205,7 +211,8 @@ describe 'Organizations' do
       delete "/organization/#{id}", headers: { Authorization: token_for(:admin),
                                                Accept: 'application/json' }
       expect_status 200
-      get "/organization/#{id}", headers: { Accept: 'application/json' }
+      get "/organization/#{id}", headers: { Authorization: token_for(:user),
+                                            Accept: 'application/json' }
       expect_status 404
     end
 

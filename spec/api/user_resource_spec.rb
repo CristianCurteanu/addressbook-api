@@ -25,14 +25,16 @@ describe 'Users' do
                     email: @user.email,
                     type: @user.type.name,
                     organizations: user_organizations }
-      get "/user/#{@user.id}", headers: { Accept: 'application/json' }
+      get "/user/#{@user.id}", headers: { Authorization: token_for(:user),
+                                          Accept: 'application/json' }
       expect_status 200
       expect(response.body).to eql user_json.to_json
     end
 
     it 'should return 404 if no user found' do
       id = User.maximum(:id).to_i.next
-      get "/user/#{id}", headers: { Accept: 'application/json' }
+      get "/user/#{id}", headers: { Authorization: token_for(:user),
+                                    Accept: 'application/json' }
       expect_status 404
       expect_json(message: "Couldn't find User with 'id'=#{id}")
     end
@@ -146,7 +148,8 @@ describe 'Users' do
 
     it 'should remove the selected user' do
       user_id = delete_user_by_admin
-      get "/user/#{user_id}", headers: { Accept: 'application/json' }
+      get "/user/#{user_id}", headers: { Authorization: token_for(:user),
+                                         Accept: 'application/json' }
       expect_status 404
     end
   end

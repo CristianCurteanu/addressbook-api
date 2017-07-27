@@ -1,6 +1,8 @@
 class UsersController < ApplicationController
   before_action :admin_authorized?, only: [:update_user_field_by_id, :delete_user]
-  before_action :user_authorized?, only: [:update_current_user,
+  before_action :user_authorized?, only: [:get_users,
+                                          :get_user_by_id,
+                                          :update_current_user,
                                           :get_current_user,
                                           :add_user_organization]
 

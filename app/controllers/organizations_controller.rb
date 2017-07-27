@@ -1,6 +1,8 @@
 class OrganizationsController < ApplicationController
   before_action :admin_authorized?, only: [:create, :destroy]
-  before_action :user_authorized?, only: [:post_organization_contact,
+  before_action :user_authorized?, only: [:get_organizations,
+                                          :get_organization_by_id,
+                                          :post_organization_contact,
                                           :update_organization_contact,
                                           :update_organization,
                                           :delete_organization_contacts]
